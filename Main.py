@@ -1,5 +1,8 @@
 import pygame
-import AnimatedSprite
+from AnimatedSprite import AnimatedSprite
+from Camera import Camera
+from Tile import Tile
+
 
 SIZE = X, Y = 800, 600
 FPS = 60
