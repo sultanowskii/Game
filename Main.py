@@ -25,23 +25,28 @@ def load_image(name, colorkey=None):
     return image
 
 
+music_checker = True
+main_music = 'data/music.mp3' # Jason Garner & Vince de Vera – Creepy Forest (Vinyl) (Don t Starve OST)
 screen = pygame.display.set_mode((X, Y))
 clock = pygame.time.Clock()
 running = True
 screen.fill(BLACK)
 player = None
+buttons_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
-tiles_group = pygame.sprite.Group()
+grounds_group = pygame.sprite.Group()
+walls_group = pygame.sprite.Group()
 left_walls_group = pygame.sprite.Group()
 right_walls_group = pygame.sprite.Group()
 up_walls_group = pygame.sprite.Group()
 down_walls_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
-tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png')}
+tile_images = {'wall': load_image('box.png'), 'empty': load_image('ground.png')}
 tile_width = tile_height = 50
 player_sprite = load_image('player_sprite.png')
 enemy_sprite = load_image('player_sprite.png')
+
 
 def start_screen():  # Это висит как пример, потом переделай
     intro_text = ["ЗАСТАВКА", "",
@@ -61,29 +66,21 @@ def start_screen():  # Это висит как пример, потом пер�
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit_game()
-            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                if pygame.sprite.spritecollideany(player, walls, )
-        pygame.display.flip()
-
 
 def generate_level(level):
     new_player, x, y = None, None, None
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
-                Tile('empty', x, y, tiles_group, all_sprites, tile_images)
+                Tile('empty', x, y, grounds_group, all_sprites, tile_images)
             elif level[y][x] == '#':
-                Tile('wall', x, y, tiles_group, all_sprites, tile_images)
+                Tile('wall', x, y, walls_group, all_sprites, tile_images)
                 Border("left", x * 50, y * 50, x * 50, (y + 1) * 50, left_walls_group)  # making invisible borders to checking collide
                 Border("right", (x + 1) * 50, y * 50, (x + 1) * 50, (y + 1) * 50, right_walls_group) # I'm really not sure that it doesnt
                 Border("up", x * 50, y * 50, (x + 1) * 50, y * 50, up_walls_group) # need have at least 1 width. If it does, just update
                 Border("down", x * 50, (y + 1) * 50, (x + 1) * 50, (y + 1) * 50, down_walls_group) # it very early to make it covered with others titles and sprites.
             elif level[y][x] == '@':
-                Tile('empty', x, y, tiles_group, all_sprites, tile_images)
+                Tile('empty', x, y, grounds_group, all_sprites, tile_images)
                 new_player = Player(player_sprite, ENTER_HERE_COLUMNS_AND_ROWS, x * 50, y * 50, player_group)
             elif level[y][x] == '!':
                 Enemy(enemy_sprite, ENTER_HERE_COLUMNS_AND_ROWS, x * 50, y * 50, enemies_group)
@@ -94,9 +91,11 @@ def exit_game():  # quiting pygame
     running = False
     pygame.quit()
 
-
+start_screen()
+camera = Camera(X, Y)
+pygame.mixer.music.load(main_music)
+pygame.mixer.music.play()
 while running:
-    screen.fill((255, 255, 255))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit_game()
@@ -114,9 +113,23 @@ while running:
             if not pygame.sprite.spritecollideany(player, down_walls_group):
                 player.move_down()
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.pos: # buttons
-                pass
-    #  here are updates of sprite groups
-    # dont forget about Camera
+            if event.pos == [0, 0]: # buttons
+                if music_checker:
+                    pygame.mixer.music.pause()
+                    music_checker = False
+                else:
+                    pygame.mixer.music.unpause()
+                    music_checker = True
+    screen.fill(BLACK)
+    camera.update(player)
+    right_walls_group.draw(screen)
+    left_walls_group.draw(screen)
+    up_walls_group.draw(screen)
+    down_walls_group.draw(screen)
+    grounds_group.draw(screen)
+    player_group.draw(screen)
+    enemies_group.draw(screen)
+    walls_group.draw(screen)
+    buttons_group.draw(screen)
     pygame.display.flip()
     clock.tick(FPS)
