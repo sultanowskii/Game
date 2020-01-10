@@ -49,22 +49,16 @@ enemy_sprite = load_image('player_sprite.png')
 
 
 def start_screen():  # Это висит как пример, потом переделай
-    intro_text = ["ЗАСТАВКА", "",
-                  "Правила игры",
-                  "Ты умеешь ходить,",
-                  "И все"]
-    background = pygame.transform.scale(load_image('fon.jpg'), (X, Y))
+    background = pygame.transform.scale(load_image('background.jpg'), (X, Y))
     screen.blit(background, (0, 0))
-    font = pygame.font.Font(None, 60)
-    text_coord = 50
-    for line in intro_text:
-        string_rendered = font.render(line, 1, pygame.Color('black'))
-        intro_rect = string_rendered.get_rect()
-        text_coord += 10
-        intro_rect.top = text_coord
-        intro_rect.x = 10
-        text_coord += intro_rect.height
-        screen.blit(string_rendered, intro_rect)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                exit_game()
+            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                return
+        pygame.display.flip()
+        clock.tick(FPS)
 
 
 def generate_level(level):
