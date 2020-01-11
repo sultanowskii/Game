@@ -28,12 +28,16 @@ def load_image(name, colorkey=None):
 
 pause_screen_cnecker = False
 music_checker = True
+running = True
+
 main_music = 'data/music.mp3'  # Jason Garner & Vince de Vera – Creepy Forest (Vinyl) (Don t Starve OST)
+
 screen = pygame.display.set_mode((X, Y))
 clock = pygame.time.Clock()
-running = True
 screen.fill(BLACK)
 player = None
+tile_width = tile_height = 50
+
 buttons_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 grounds_group = pygame.sprite.Group()
@@ -44,10 +48,10 @@ up_walls_group = pygame.sprite.Group()
 down_walls_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
-tile_images = {'wall': load_image('box.png'), 'empty': load_image('ground.png')}
-tile_width = tile_height = 50
+
+tile_images = {'wall': load_image('wall.png'), 'ground': load_image('ground.png')}
 player_sprite = load_image('player_sprite.png')
-enemy_sprite = load_image('player_sprite.png')
+enemy_sprite = load_image('enemy_sprite.png')
 
 
 def start_screen():
@@ -82,7 +86,7 @@ def generate_level(level):
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
-                Tile('empty', x, y, grounds_group, all_sprites, tile_images)
+                Tile('ground', x, y, grounds_group, all_sprites, tile_images)
             elif level[y][x] == '#':
                 Tile('wall', x, y, walls_group, all_sprites, tile_images)
                 Border("left", x * 50, y * 50, x * 50, (y + 1) * 50,
@@ -94,7 +98,7 @@ def generate_level(level):
                 Border("down", x * 50, (y + 1) * 50, (x + 1) * 50, (y + 1) * 50,
                        down_walls_group)  # it very early to make it covered with others titles and sprites.
             elif level[y][x] == '@':
-                Tile('empty', x, y, grounds_group, all_sprites, tile_images)
+                Tile('ground', x, y, grounds_group, all_sprites, tile_images)
                 new_player = Player(player_sprite, ENTER_HERE_COLUMNS_AND_ROWS, x * 50, y * 50, player_group)
             elif level[y][x] == '!':
                 Enemy(enemy_sprite, ENTER_HERE_COLUMNS_AND_ROWS, x * 50, y * 50, enemies_group)
@@ -117,7 +121,8 @@ while running:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             if not pygame.sprite.spritecollideany(player,
-                                                  right_walls_group):  # checking if our player collide with some wall from any side
+                                                  right_walls_group):
+                # checking if our player collide with some wall from any side
                 player.move_right()
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             if not pygame.sprite.spritecollideany(player, left_walls_group):
