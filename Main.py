@@ -36,7 +36,8 @@ screen = pygame.display.set_mode((X, Y))
 clock = pygame.time.Clock()
 screen.fill(BLACK)
 player = None
-tile_width = tile_height = 50
+tile_width = tile_height = 48
+charecter_height = charecter_width = 24
 
 buttons_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
@@ -50,8 +51,8 @@ player_group = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
 
 tile_images = {'wall': load_image('wall.png'), 'ground': load_image('ground.png')}
-player_sprite = load_image('player_sprite.png')
-enemy_sprite = load_image('enemy_sprite.png')
+player_sprite = load_image('player_sprite.png', (236, 255, 255))
+enemy_sprite = load_image('enemy_sprite.png', (236, 255, 255))
 
 
 def start_screen():
@@ -89,19 +90,22 @@ def generate_level(level):
                 Tile('ground', x, y, grounds_group, all_sprites, tile_images)
             elif level[y][x] == '#':
                 Tile('wall', x, y, walls_group, all_sprites, tile_images)
-                Border("left", x * 50, y * 50, x * 50, (y + 1) * 50,
+                Border("left", x * tile_width, y * tile_height, x * tile_width, (y + 1) * tile_height,
                        left_walls_group)  # making invisible borders to checking collide
-                Border("right", (x + 1) * 50, y * 50, (x + 1) * 50, (y + 1) * 50,
+                Border("right", (x + 1) * tile_width, y * tile_height, (x + 1) * tile_width, (y + 1) * tile_height,
                        right_walls_group)  # I'm really not sure that it doesnt
-                Border("up", x * 50, y * 50, (x + 1) * 50, y * 50,
+                Border("up", x * tile_width, y * tile_height, (x + 1) * tile_width, y * tile_height,
                        up_walls_group)  # need have at least 1 width. If it does, just update
-                Border("down", x * 50, (y + 1) * 50, (x + 1) * 50, (y + 1) * 50,
+                Border("down", x * tile_width, (y + 1) * tile_height, (x + 1) * tile_width, (y + 1) * tile_height,
                        down_walls_group)  # it very early to make it covered with others titles and sprites.
             elif level[y][x] == '@':
                 Tile('ground', x, y, grounds_group, all_sprites, tile_images)
-                new_player = Player(player_sprite, ENTER_HERE_COLUMNS_AND_ROWS, x * 50, y * 50, player_group)
+                new_player = Player(player_sprite, ENTER_HERE_COLUMNS_AND_ROWS,
+                                    x * tile_width + (tile_width - charecter_width) / 2,
+                                    y * tile_height + (tile_height - charecter_height) / 2, player_group)
             elif level[y][x] == '!':
-                Enemy(enemy_sprite, ENTER_HERE_COLUMNS_AND_ROWS, x * 50, y * 50, enemies_group)
+                Enemy(enemy_sprite, ENTER_HERE_COLUMNS_AND_ROWS, x * tile_width + (tile_width - charecter_width) / 2,
+                      y * tile_height + (tile_height - charecter_height) / 2, enemies_group)
     return new_player, x, y
 
 
