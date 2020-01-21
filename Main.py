@@ -1,5 +1,4 @@
 import pygame
-from Camera import Camera
 from Tile import Tile
 from Enemy import Enemy
 from Player import Player
@@ -35,9 +34,9 @@ main_music = 'data/music.mp3'  # Jason Garner & Vince de Vera – Creepy Forest 
 screen = pygame.display.set_mode((X, Y))
 clock = pygame.time.Clock()
 screen.fill(BLACK)
-player = None
 tile_width = tile_height = 48
 charecter_height = charecter_width = 24
+player = None
 
 buttons_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
@@ -84,30 +83,40 @@ def pause_screen():
         clock.tick(FPS)
 
 
+def load_level(filename):
+    filename = "data/" + filename
+    with open(filename, 'r') as mapFile:
+        level_map = [line.strip() for line in mapFile]
+    max_width = max(map(len, level_map))
+    return list(map(lambda x: x.ljust(max_width, '.'), level_map))
+
+
 def generate_level(level):
     new_player, x, y = None, None, None
+    ly = Y - len(level) * tile_height / 2
+    lx = X - len(level[0]) * tile_width / 2
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
-                Tile('ground', x, y, grounds_group, all_sprites, tile_images)
+                Tile('ground', x + lx, y + ly, grounds_group, all_sprites, tile_images, tile_width, tile_height)
             elif level[y][x] == '#':
-                Tile('wall', x, y, walls_group, all_sprites, tile_images)
-                Border("left", x * tile_width, y * tile_height, x * tile_width, (y + 1) * tile_height,
+                Tile('wall', x + lx, y + ly, walls_group, all_sprites, tile_images, tile_width, tile_height)
+                Border("left", x * tile_width + lx, y * tile_height + ly, x * tile_width + lx, (y + 1) * tile_height + ly,
                        left_walls_group)  # making invisible borders to checking collide
-                Border("right", (x + 1) * tile_width, y * tile_height, (x + 1) * tile_width, (y + 1) * tile_height,
+                Border("right", (x + 1) * tile_width + lx, y * tile_height + ly, (x + 1) * tile_width + lx, (y + 1) * tile_height + ly,
                        right_walls_group)  # I'm really not sure that it doesnt
-                Border("up", x * tile_width, y * tile_height, (x + 1) * tile_width, y * tile_height,
+                Border("up", x * tile_width + lx, y * tile_height + ly, (x + 1) * tile_width + lx, y * tile_height + ly,
                        up_walls_group)  # need have at least 1 width. If it does, just update
-                Border("down", x * tile_width, (y + 1) * tile_height, (x + 1) * tile_width, (y + 1) * tile_height,
+                Border("down", x * tile_width + lx, (y + 1) * tile_height + ly, (x + 1) * tile_width + lx, (y + 1) * tile_height + ly,
                        down_walls_group)  # it very early to make it covered with others titles and sprites.
             elif level[y][x] == '@':
-                Tile('ground', x, y, grounds_group, all_sprites, tile_images)
+                Tile('ground', x + lx, y + ly, grounds_group, all_sprites, tile_images, tile_width, tile_height)
                 new_player = Player(player_sprite, ENTER_HERE_COLUMNS_AND_ROWS,
-                                    x * tile_width + (tile_width - charecter_width) / 2,
-                                    y * tile_height + (tile_height - charecter_height) / 2, player_group)
+                                    x * tile_width + (tile_width - charecter_width) / 2 + lx,
+                                    y * tile_height + (tile_height - charecter_height) / 2 + ly, player_group)
             elif level[y][x] == '!':
-                Enemy(enemy_sprite, ENTER_HERE_COLUMNS_AND_ROWS, x * tile_width + (tile_width - charecter_width) / 2,
-                      y * tile_height + (tile_height - charecter_height) / 2, enemies_group)
+                Enemy(enemy_sprite, ENTER_HERE_COLUMNS_AND_ROWS, x * tile_width + (tile_width - charecter_width) / 2 + lx,
+                      y * tile_height + (tile_height - charecter_height) / 2 + ly, enemies_group)
     return new_player, x, y
 
 
@@ -117,9 +126,9 @@ def exit_game():  # quiting pygame
 
 
 start_screen()
-camera = Camera(X, Y)
 pygame.mixer.music.load(main_music)
 pygame.mixer.music.play()
+player, level_x, level_y = generate_level(load_level("data\level.txt"))
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -129,16 +138,16 @@ while running:
             if not pygame.sprite.spritecollideany(player,
                                                   left_walls_group):
                 # checking if our player collide with some wall from any side
-                player.move_right()
+                player.move_right(2)
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             if not pygame.sprite.spritecollideany(player, right_walls_group):
-                player.move_left()
+                player.move_left(2)
         if keys[pygame.K_UP] or keys[pygame.K_w]:
             if not pygame.sprite.spritecollideany(player, down_walls_group):
-                player.move_up()
+                player.move_up(2)
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
             if not pygame.sprite.spritecollideany(player, up_walls_group):
-                player.move_down()
+                player.move_down(2)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 pause_screen()
@@ -151,7 +160,6 @@ while running:
                 else:
                     pygame.mixer.music.unpause()
                     music_checker = True
-    camera.update(player)
     player_group.update()
     enemies_group.update()
     walls_group.update()
