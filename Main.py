@@ -56,14 +56,16 @@ enemy_sprite = load_image('enemy_sprite.png', (236, 255, 255))
 
 
 def start_screen():
-    background = pygame.transform.scale(load_image('background_start.jpg'), (X, Y))
-    screen.blit(background, (0, 0))
+    x = 1
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit_game()
             elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                 return
+        background = pygame.transform.scale(load_image(f'bck_frames\\bck_start{x % 40 + 1}.png'), (X, Y))
+        screen.blit(background, (0, 0))
+        x += 1
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -125,17 +127,17 @@ while running:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             if not pygame.sprite.spritecollideany(player,
-                                                  right_walls_group):
+                                                  left_walls_group):
                 # checking if our player collide with some wall from any side
                 player.move_right()
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            if not pygame.sprite.spritecollideany(player, left_walls_group):
+            if not pygame.sprite.spritecollideany(player, right_walls_group):
                 player.move_left()
         if keys[pygame.K_UP] or keys[pygame.K_w]:
-            if not pygame.sprite.spritecollideany(player, up_walls_group):
+            if not pygame.sprite.spritecollideany(player, down_walls_group):
                 player.move_up()
         if keys[pygame.K_DOWN] or keys[pygame.K_s]:
-            if not pygame.sprite.spritecollideany(player, down_walls_group):
+            if not pygame.sprite.spritecollideany(player, up_walls_group):
                 player.move_down()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -149,16 +151,22 @@ while running:
                 else:
                     pygame.mixer.music.unpause()
                     music_checker = True
-    screen.fill(BLACK)
     camera.update(player)
+    player_group.update()
+    enemies_group.update()
+    walls_group.update()
+    buttons_group.update()
+
+    screen.fill(BLACK)
+    grounds_group.draw(screen)
     right_walls_group.draw(screen)
     left_walls_group.draw(screen)
     up_walls_group.draw(screen)
     down_walls_group.draw(screen)
-    grounds_group.draw(screen)
-    player_group.draw(screen)
     enemies_group.draw(screen)
+    player_group.draw(screen)
     walls_group.draw(screen)
     buttons_group.draw(screen)
+
     pygame.display.flip()
     clock.tick(FPS)
