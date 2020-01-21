@@ -4,11 +4,12 @@ import pygame
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y, group):
         super().__init__(group)
-        self.frames = []
-        self.cut_sheet(sheet, columns, rows)
-        self.cur_frame = 0
-        self.image = self.frames[self.cur_frame]
-        self.rect = self.rect.move(x, y)
+        # self.frames = []
+        # self.cut_sheet(sheet, columns, rows)
+        # self.cur_frame = 0
+        # self.image = self.frames[self.cur_frame]
+        self.image = sheet
+        self.rect = self.image.get_rect().move(x, y)
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,

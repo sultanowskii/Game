@@ -7,19 +7,19 @@ class Player(AnimatedSprite):
         super().__init__(sheet, columns, rows, x, y, group)
 
     def move_up(self, speed):
-        self.rect.move(-speed, 0)
+        self.rect.y -= speed
 
     def move_down(self, speed):
-        self.rect.move(speed, 0)
+        self.rect.y += speed
 
     def move_right(self, speed):
-        self.rect.move(0, speed)
+        self.rect.x += speed
 
     def move_left(self, speed):
-        self.rect.move(0, -speed)
+        self.rect.x -= speed
 
     def cut_sheet(self, sheet, columns, rows):
         super().cut_sheet(sheet, columns, rows)
 
     def update(self):
-        pass  # анимация и т.д.
+        pass
