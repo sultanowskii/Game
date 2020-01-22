@@ -6,8 +6,10 @@ import random
 class Enemy(AnimatedSprite):
     def __init__(self, sheet, columns, rows, x, y, group, map, y_map_now, x_map_now, id):  # think about making a mask here
         super().__init__(sheet, columns, rows, x, y, group)
-        self.n = 4
-        self.m = 4
+        self.lamp = None
+        self.n = 6
+        self.id = id
+        self.m = 6
         self.x_go_now = 0
         self.y_go_now = 0
         self.absolute_x = x
@@ -40,7 +42,9 @@ class Enemy(AnimatedSprite):
         self.dead = True
         self.way_y = []
         self.way_x = []
-        self.way_x, self.way_y = self.group.make_way(self.x_now, self.y_now)
+        for en in self.group:
+            if en.id != self.id:
+                en.make_way(self.x_now, self.y_now)
 
     def cut_sheet(self, sheet, columns, rows):
         super().cut_sheet(sheet, columns, rows)
@@ -123,6 +127,7 @@ class Enemy(AnimatedSprite):
             elif y + 1 < self.m and (way_x[x][y + 1] != 0 or way_y[x][y + 1] != 0):
                 y += 1
             # на данном этапе x и y это координаты, откуда мы пришли в точку (x_where, y_where)
+            
             while x != x_player or y != y_player:  # идём по предкам и находим путь
                 way_for_x.append(x)
                 way_for_y.append(y)
@@ -173,13 +178,17 @@ class Enemy(AnimatedSprite):
                 if self.x_now != self.x_go_now:
                     if self.x_now > self.x_go_now:
                         self.rect.y -= 1
+                        self.lamp.rotate_up(self.rect.x, self.rect.y)
                     else:
                         self.rect.y += 1
+                        self.lamp.rotate_down(self.rect.x, self.rect.y)
                 else:
                     if self.y_now > self.y_go_now:
                         self.rect.x -= 1
+                        self.lamp.rotate_left(self.rect.x, self.rect.y)
                     else:
                         self.rect.x += 1
+                        self.lamp.rotate_right(self.rect.x, self.rect.y)
             else:
                 self.step_cntr = 0
                 self.last_x = self.x_now
