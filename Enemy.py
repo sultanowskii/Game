@@ -4,7 +4,7 @@ import random
 
 
 class Enemy(AnimatedSprite):
-    def __init__(self, sheet, columns, rows, x, y, group, map, y_map_now, x_map_now):  # think about making a mask here
+    def __init__(self, sheet, columns, rows, x, y, group, map, y_map_now, x_map_now, id):  # think about making a mask here
         super().__init__(sheet, columns, rows, x, y, group)
         self.n = 4
         self.m = 4

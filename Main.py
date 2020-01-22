@@ -4,6 +4,7 @@ from Enemy import Enemy
 from Player import Player
 from Border import Border
 # from Button import Button
+from Lamp import Lamp
 import os
 import sys
 
@@ -47,10 +48,15 @@ going_up = False
 going_down = False
 going_right = False
 going_left = False
+lamp_up_sprite = load_image("lamp_up.png")
+lamp_down_sprite = load_image("lamp_down.png")
+lamp_right_sprite = load_image("lamp_right.png")
+lamp_left_sprite = load_image("lamp_left.png")
 music_off_button_sprite = load_image("music_off.png")
 music_on_button_sprite = load_image("music_on.png")
 # music_button = MusicButton(700, 20, music_on_button_sprite, music_off_button_sprite, buttons_group)
 
+lamps_group = pygame.sprite.Group()
 buttons_group = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 grounds_group = pygame.sprite.Group()
@@ -141,6 +147,7 @@ def generate_level(level):
                 b = y * tile_height + (tile_height - charecter_height) // 2 + ly
                 Enemy(enemy_sprite, 0, 0, a, b, enemies_group, level,
                       (a - lx) // tile_width, (b - ly) // tile_height)
+                PUT HERE MAKING A LAMP
     return new_player, x, y, level
 
 
