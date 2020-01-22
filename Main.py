@@ -22,6 +22,7 @@ def load_image(name, colorkey=None):
     if colorkey is not None:
         if colorkey == -1:
             colorkey = image.get_at((0, 0))
+        image = image.convert()
         image.set_colorkey(colorkey)
     else:
         image = image.convert_alpha()
@@ -48,10 +49,10 @@ going_up = False
 going_down = False
 going_right = False
 going_left = False
-lamp_up_sprite = load_image("lamp_up.png")
-lamp_down_sprite = load_image("lamp_down.png")
-lamp_right_sprite = load_image("lamp_right.png")
-lamp_left_sprite = load_image("lamp_left.png")
+lamp_up_sprite = load_image("lamp_up.png", (235, 255, 255))
+lamp_down_sprite = load_image("lamp_down.png", (235, 255, 255))
+lamp_right_sprite = load_image("lamp_right.png", (235, 255, 255))
+lamp_left_sprite = load_image("lamp_left.png", (235, 255, 255))
 music_off_button_sprite = load_image("music_off.png")
 music_on_button_sprite = load_image("music_on.png")
 # music_button = MusicButton(700, 20, music_on_button_sprite, music_off_button_sprite, buttons_group)
@@ -118,6 +119,7 @@ def generate_level(level):
     lx = (X - len(level[0]) * tile_width) // 2
     ground_height = len(level)
     ground_width = len(level[0])
+    id_cntr = 0
     for y in range(len(level)):
         for x in range(len(level[y])):
             if level[y][x] == '.':
@@ -145,9 +147,11 @@ def generate_level(level):
                 Tile('ground', x, y, grounds_group, all_sprites, tile_images, tile_width, tile_height, lx, ly)
                 a = x * tile_width + (tile_width - charecter_width) // 2 + lx
                 b = y * tile_height + (tile_height - charecter_height) // 2 + ly
-                Enemy(enemy_sprite, 0, 0, a, b, enemies_group, level,
-                      (a - lx) // tile_width, (b - ly) // tile_height)
-                PUT HERE MAKING A LAMP
+                curr_enemy = Enemy(enemy_sprite, 0, 0, a, b, enemies_group, level,
+                      (a - lx) // tile_width, (b - ly) // tile_height, id_cntr)
+                curr_lamp = Lamp(curr_enemy.rect.x, curr_enemy.rect.y, lamp_up_sprite, lamp_down_sprite, lamp_right_sprite, lamp_left_sprite, id_cntr, lamps_group)
+                curr_enemy.lamp = curr_lamp
+                id_cntr += 1
     return new_player, x, y, level
 
 
@@ -216,23 +220,27 @@ while running:
 
     if going_down:
         #   if people can go and he wants go (key pressed), every iteration we move him to his speed
-        player.move_down(1)
+        player.move_down(2)
     if going_up:
-        player.move_up(1)
+        player.move_up(2)
     if going_right:
-        player.move_right(1)
+        player.move_right(2)
     if going_left:
-        player.move_left(1)
+        player.move_left(2)
 
     #   if people collided with wall, we make him go back (we must do this with player's speed)
     if pygame.sprite.spritecollideany(player, left_walls_group):
-        player.move_left(1)
+        player.move_left(2)
     if pygame.sprite.spritecollideany(player, right_walls_group):
-        player.move_right(1)
+        player.move_right(2)
     if pygame.sprite.spritecollideany(player, up_walls_group):
-        player.move_up(1)
+        player.move_up(2)
     if pygame.sprite.spritecollideany(player, down_walls_group):
-        player.move_down(1)
+        player.move_down(2)
+
+    for enemy in enemies_group:
+        if pygame.sprite.collide_rect(player, enemy):
+            enemy.kill()
 
     player_group.update()
     enemies_group.update()
@@ -242,6 +250,7 @@ while running:
     up_walls_group.draw(screen)
     down_walls_group.draw(screen)
     grounds_group.draw(screen)
+    lamps_group.draw(screen)
     enemies_group.draw(screen)
     player_group.draw(screen)
     walls_group.draw(screen)

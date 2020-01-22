@@ -10,23 +10,28 @@ class Lamp(pygame.sprite.Sprite):
         self.s_right = sprite_right
         self.s_left = sprite_left
         self.image = sprite_down
-        self.rect = self.image.self.image.get_rect().move(x, y)
+        self.rect = self.image.get_rect().move(x, y)
 
-    def rotate_up(self):
+    def rotate_up(self, x, y):
         self.image = self.s_up
-        self.rect = self.image.self.image.get_rect()
+        self.rect = self.image.get_rect()
+        self.rect.x = x - 12
+        self.rect.y = y - 60
 
-    def rotate_down(self):
+    def rotate_down(self, x, y):
         self.image = self.s_down
-        self.rect = self.image.self.image.get_rect()
+        self.rect = self.image.get_rect()
+        self.rect.x = x - 12
+        self.rect.y = y + 25
 
-    def rotate_right(self):
+    def rotate_right(self, x, y):
         self.image = self.s_right
-        self.rect = self.image.self.image.get_rect()
+        self.rect = self.image.get_rect()
+        self.rect.x = x + 25
+        self.rect.y = y - 13
 
-    def rotate_left(self):
+    def rotate_left(self, x, y):
         self.image = self.s_left
-        self.rect = self.image.self.image.get_rect()
-
-    def move(self, x, y):
-        self.rect.move(x, y)
+        self.rect = self.image.get_rect()
+        self.rect.x = x - 60
+        self.rect.y = y - 12
