@@ -3,7 +3,7 @@ from Tile import Tile
 from Enemy import Enemy
 from Player import Player
 from Border import Border
-# from Button import Button
+from MusicButton import MusicButton
 from Lamp import Lamp
 import os
 import sys
@@ -30,7 +30,6 @@ def load_image(name, colorkey=None):
 
 
 pause_screen_cnecker = False
-music_checker = True
 running = True
 
 main_music = 'data/music.mp3'  # Jason Garner & Vince de Vera – Creepy Forest (Vinyl) (Don t Starve OST)
@@ -55,7 +54,6 @@ lamp_right_sprite = load_image("lamp_right.png", (235, 255, 255))
 lamp_left_sprite = load_image("lamp_left.png", (235, 255, 255))
 music_off_button_sprite = load_image("music_off.png")
 music_on_button_sprite = load_image("music_on.png")
-# music_button = MusicButton(700, 20, music_on_button_sprite, music_off_button_sprite, buttons_group)
 
 lamps_group = pygame.sprite.Group()
 buttons_group = pygame.sprite.Group()
@@ -72,6 +70,8 @@ enemies_group = pygame.sprite.Group()
 tile_images = {'wall': load_image('wall.png'), 'ground': load_image('ground.png')}
 player_sprite = load_image('player_sprite.png', (236, 255, 255))
 enemy_sprite = load_image('enemy_sprite.png', (236, 255, 255))
+
+music_button = MusicButton(680, 20, music_on_button_sprite, music_off_button_sprite, buttons_group, 100, 44)
 
 
 def start_screen():
@@ -163,6 +163,9 @@ def terminate():
 pygame.mixer.music.load(main_music)
 pygame.mixer.music.play(1000000)
 player, level_x, level_y, level_map = generate_level(load_level("level.txt"))
+for el in enemies_group:
+    el.n = level_y
+    el.m = level_x
 start_screen()
 while running:
     screen.fill(BLACK)
@@ -207,16 +210,14 @@ while running:
                 going_up = False
             if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 going_down = False
-        # if event.type == pygame.MOUSEBUTTONDOWN:
-        #     if event.pos == [0, 0]:  # buttons
-        #         if music_buton.isMouseOn(event.pos):
-        #             music_button.switch()
-        #             if music_checker:
-        #                 music_checker = False
-        #                 pygame.mixer.stop()
-        #             else:
-        #                 music_checker = True
-        #                 pygame.mixer.unpause()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if music_button.isMouseOn(event.pos):
+                if music_button.turned:
+                    print("hey")
+                    pygame.mixer.music.pause()
+                else:
+                    pygame.mixer.music.unpause()
+                music_button.switch()
 
     if going_down:
         #   if people can go and he wants go (key pressed), every iteration we move him to his speed
@@ -244,7 +245,7 @@ while running:
 
     player_group.update()
     enemies_group.update()
-    # buttons_group.update()
+    buttons_group.update()
     right_walls_group.draw(screen)
     left_walls_group.draw(screen)
     up_walls_group.draw(screen)
@@ -254,7 +255,7 @@ while running:
     enemies_group.draw(screen)
     player_group.draw(screen)
     walls_group.draw(screen)
-    # buttons_group.draw(screen)
+    buttons_group.draw(screen)
     pygame.display.flip()
     clock.tick(FPS)
 

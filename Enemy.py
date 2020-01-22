@@ -127,7 +127,6 @@ class Enemy(AnimatedSprite):
             elif y + 1 < self.m and (way_x[x][y + 1] != 0 or way_y[x][y + 1] != 0):
                 y += 1
             # на данном этапе x и y это координаты, откуда мы пришли в точку (x_where, y_where)
-            
             while x != x_player or y != y_player:  # идём по предкам и находим путь
                 way_for_x.append(x)
                 way_for_y.append(y)
