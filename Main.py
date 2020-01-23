@@ -1,12 +1,14 @@
 import pygame
+import os
+import sys
+
 from Tile import Tile
 from Enemy import Enemy
 from Player import Player
 from Border import Border
-# from Button import Button
+from MusicButton import MusicButton
 from Lamp import Lamp
-import os
-import sys
+from PauseButton import PauseButton
 
 SIZE = X, Y = 800, 600
 FPS = 60
@@ -29,33 +31,44 @@ def load_image(name, colorkey=None):
     return image
 
 
-pause_screen_cnecker = False
-music_checker = True
-running = True
-
-main_music = 'data/music.mp3'  # Jason Garner & Vince de Vera – Creepy Forest (Vinyl) (Don t Starve OST)
-
 screen = pygame.display.set_mode((X, Y))
 clock = pygame.time.Clock()
 screen.fill(BLACK)
+
 tile_width = tile_height = 48
 charecter_height = charecter_width = 24
-player = None
-lx = -1
+lx = -1 # отступы поля от границы экрана
 ly = -1
-ground_width = 0
-ground_height = 0
+
 going_up = False
 going_down = False
 going_right = False
 going_left = False
+pause_screen_cnecker = False
+running = True
+
 lamp_up_sprite = load_image("lamp_up.png", (235, 255, 255))
 lamp_down_sprite = load_image("lamp_down.png", (235, 255, 255))
 lamp_right_sprite = load_image("lamp_right.png", (235, 255, 255))
 lamp_left_sprite = load_image("lamp_left.png", (235, 255, 255))
+tile_images = {'wall': load_image('wall.png'), 'ground': load_image('ground.png')}
+player_sprite = load_image('player_sprite.png', (236, 255, 255))
+enemy_sprite = load_image('enemy_sprite.png', (236, 255, 255))
+
 music_off_button_sprite = load_image("music_off.png")
 music_on_button_sprite = load_image("music_on.png")
-# music_button = MusicButton(700, 20, music_on_button_sprite, music_off_button_sprite, buttons_group)
+pause_button_sprite = load_image("pause_button.png")
+
+pl_down_sprite = load_image("player_sprite_down.png", -1)
+pl_up_sprite = load_image("player_sprite_up.png", -1)
+pl_right_sprite = load_image("player_sprite_right.png", -1)
+pl_left_sprite = load_image("player_sprite_left.png", -1)
+en_down_sprite = load_image("enemy_sprite_down.png", -1)
+en_up_sprite = load_image("enemy_sprite_up.png", -1)
+en_right_sprite = load_image("enemy_sprite_right.png", -1)
+en_left_sprite = load_image("enemy_sprite_left.png", -1)
+
+main_music = 'data/music.mp3'  # Jason Garner & Vince de Vera – Creepy Forest (Vinyl) (Don t Starve OST)
 
 lamps_group = pygame.sprite.Group()
 buttons_group = pygame.sprite.Group()
@@ -69,9 +82,9 @@ down_walls_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 enemies_group = pygame.sprite.Group()
 
-tile_images = {'wall': load_image('wall.png'), 'ground': load_image('ground.png')}
-player_sprite = load_image('player_sprite.png', (236, 255, 255))
-enemy_sprite = load_image('enemy_sprite.png', (236, 255, 255))
+music_button = MusicButton(695, 5, music_on_button_sprite, music_off_button_sprite, buttons_group, 100, 44)
+pause_button = PauseButton(645, 5, pause_button_sprite, buttons_group, 44, 44)
+player = None
 
 
 def start_screen():
@@ -117,8 +130,6 @@ def generate_level(level):
     new_player, x, y = None, None, None
     ly = (Y - len(level) * tile_height) // 2
     lx = (X - len(level[0]) * tile_width) // 2
-    ground_height = len(level)
-    ground_width = len(level[0])
     id_cntr = 0
     for y in range(len(level)):
         for x in range(len(level[y])):
@@ -140,18 +151,22 @@ def generate_level(level):
                        down_walls_group)  # it very early to make it covered with others titles and sprites.
             elif level[y][x] == '@':
                 Tile('ground', x, y, grounds_group, all_sprites, tile_images, tile_width, tile_height, lx, ly)
-                new_player = Player(player_sprite, 0, 0,
+                new_player = Player(player_sprite, pl_up_sprite, pl_down_sprite, pl_right_sprite, pl_left_sprite, 4, 1,
                                     x * tile_width + (tile_width - charecter_width) / 2 + lx,
                                     y * tile_height + (tile_height - charecter_height) / 2 + ly, player_group)
             elif level[y][x] == '!':
                 Tile('ground', x, y, grounds_group, all_sprites, tile_images, tile_width, tile_height, lx, ly)
                 a = x * tile_width + (tile_width - charecter_width) // 2 + lx
                 b = y * tile_height + (tile_height - charecter_height) // 2 + ly
-                curr_enemy = Enemy(enemy_sprite, 0, 0, a, b, enemies_group, level,
+                curr_enemy = Enemy(enemy_sprite, en_up_sprite, en_down_sprite, en_right_sprite, en_left_sprite, 4, 1, a, b, enemies_group, level,
                       (a - lx) // tile_width, (b - ly) // tile_height, id_cntr)
                 curr_lamp = Lamp(curr_enemy.rect.x, curr_enemy.rect.y, lamp_up_sprite, lamp_down_sprite, lamp_right_sprite, lamp_left_sprite, id_cntr, lamps_group)
                 curr_enemy.lamp = curr_lamp
                 id_cntr += 1
+    Border("right", lx, ly, lx, (y + 1) * tile_height + ly, right_walls_group)
+    Border("left", lx + (x + 1) * tile_width, ly, lx + (x + 1) * tile_width, (y + 1) * tile_height + ly, left_walls_group)
+    Border("down", lx, ly, lx + (x + 1) * tile_width, ly, down_walls_group)
+    Border("up", lx, ly + (y + 1) * tile_height, lx + (x + 1) * tile_width, (y + 1) * tile_height + ly, up_walls_group)
     return new_player, x, y, level
 
 
@@ -207,26 +222,32 @@ while running:
                 going_up = False
             if event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 going_down = False
-        # if event.type == pygame.MOUSEBUTTONDOWN:
-        #     if event.pos == [0, 0]:  # buttons
-        #         if music_buton.isMouseOn(event.pos):
-        #             music_button.switch()
-        #             if music_checker:
-        #                 music_checker = False
-        #                 pygame.mixer.stop()
-        #             else:
-        #                 music_checker = True
-        #                 pygame.mixer.unpause()
-
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if music_button.isMouseOn(event.pos):
+                if music_button.turned:
+                    pygame.mixer.music.pause()
+                else:
+                    pygame.mixer.music.unpause()
+                music_button.switch()
+            if pause_button.isMouseOn(event.pos):
+                pause_screen()
+                break
+    went_anywhere = False
     if going_down:
         #   if people can go and he wants go (key pressed), every iteration we move him to his speed
+        went_anywhere = True
         player.move_down(2)
     if going_up:
         player.move_up(2)
+        went_anywhere = True
     if going_right:
         player.move_right(2)
+        went_anywhere = True
     if going_left:
         player.move_left(2)
+        went_anywhere = True
+    if not went_anywhere:
+        player.stay_on()
 
     #   if people collided with wall, we make him go back (we must do this with player's speed)
     if pygame.sprite.spritecollideany(player, left_walls_group):
@@ -244,7 +265,7 @@ while running:
 
     player_group.update()
     enemies_group.update()
-    # buttons_group.update()
+    buttons_group.update()
     right_walls_group.draw(screen)
     left_walls_group.draw(screen)
     up_walls_group.draw(screen)
@@ -254,7 +275,7 @@ while running:
     enemies_group.draw(screen)
     player_group.draw(screen)
     walls_group.draw(screen)
-    # buttons_group.draw(screen)
+    buttons_group.draw(screen)
     pygame.display.flip()
     clock.tick(FPS)
 
