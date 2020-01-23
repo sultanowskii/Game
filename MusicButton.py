@@ -1,9 +1,10 @@
 import pygame
+from Button import Button
 
 
-class MusicButton(pygame.sprite.Sprite):
+class MusicButton(Button):
     def __init__(self, x, y, on_sprite, off_sprite, group, size_x, size_y):
-        super().__init__(group)
+        super().__init__(group, x, y, size_x, size_y,)
         self.on_sprite = on_sprite
         self.off_sprite = off_sprite
         self.image = on_sprite
@@ -13,13 +14,7 @@ class MusicButton(pygame.sprite.Sprite):
         self.turned = True
 
     def isMouseOn(self, pos):
-        if self.rect.x <= pos[0] <= self.rect.x + self.n:
-            if self.rect.y <= pos[1] <= self.rect.y + self.m:
-                return True
-            else:
-                return False
-        else:
-            return False
+        return super().isMouseOn(pos)
 
     def switch(self):
         if self.turned:
