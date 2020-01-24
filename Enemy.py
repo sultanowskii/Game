@@ -1,5 +1,4 @@
 import pygame
-from AnimatedSprite import AnimatedSprite
 import random
 
 

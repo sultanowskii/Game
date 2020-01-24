@@ -1,6 +1,7 @@
 import pygame
 
 
+#   невидимая граница, которая необходима для ограничения передвижения игрока
 class Border(pygame.sprite.Sprite):
     def __init__(self, type, x1, y1, x2, y2, group):
         super().__init__(group)

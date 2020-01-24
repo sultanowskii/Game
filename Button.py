@@ -9,6 +9,7 @@ class Button(pygame.sprite.Sprite):
         self.x = x
         self.y = y
 
+    #   проверка на то, находится ли курсор на кнопке
     def isMouseOn(self, pos):
         if self.x <= pos[0] <= self.x + self.n:
             if self.y <= pos[1] <= self.y + self.m:

@@ -18,7 +18,7 @@ WHITE = pygame.Color("white")
 pygame.init()
 
 
-def load_image(name, colorkey=None):
+def load_image(name, colorkey=None):    #   загрузка изображения и создание прозрачного фона
     fullname = os.path.join('data', name)
     image = pygame.image.load(fullname)
     if colorkey is not None:
@@ -93,7 +93,7 @@ def start_screen():
     print("\033[33mЕсли же вы хотите сыграть в \033[32mсвой уровень\033[33m (инструкция по ее созданию")
     print("\033[33mесть в папке с игрой), то тогда нажмите с открытым окном клавишу '"
           "'5'',\nпотом вставьте сюда название своего уровня, ", end="")
-    print("если хотите сыграть на своем:\n")
+    print("если хотите сыграть на своем (не забудьте дописать ''.txt''):\n")
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -102,7 +102,7 @@ def start_screen():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 return
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_5:
+                if event.key == pygame.K_5: #   если нажата кнопкаа "5", то ждем от юзера названия уровня
                     level = input()
                     return level
                 return
@@ -134,7 +134,8 @@ def pause_screen():
         screen.blit(text, (-3, 530))
         screen.blit(pause_table, (45, 5))
         x = (x + 1) % 40 + 1
-        y = (y + 1) % 40 + 1
+        y = (y + 1) % 40 + 1    # увеличиваем время между сменой кадров (умножаем на 5, и в строке
+        #   присваивания (text = ...) делим его на 5)
         pygame.display.flip()
         clock.tick(FPS)
 
@@ -159,18 +160,19 @@ def generate_level(level):
                 Tile('ground', x, y, grounds_group, tile_images, tile_width, tile_height, lx, ly)
             elif level[y][x] == '#':
                 Tile('wall', x, y, walls_group, tile_images, tile_width, tile_height, lx, ly)
+                # для каждой стены создаем невидимые барьеры
                 Border("left", x * tile_width + lx, y * tile_height + ly + 1, x * tile_width + lx,
                        (y + 1) * tile_height + ly - 2,
-                       left_walls_group)  # making invisible borders to checking collide
+                       left_walls_group)
                 Border("right", (x + 1) * tile_width + lx, y * tile_height + ly + 1, (x + 1) * tile_width + lx,
                        (y + 1) * tile_height + ly - 2,
-                       right_walls_group)  # I'm really not sure that it doesnt
+                       right_walls_group)
                 Border("up", x * tile_width + lx + 1, y * tile_height + ly, (x + 1) * tile_width + lx - 2,
                        y * tile_height + ly,
-                       up_walls_group)  # need have at least 1 width. If it does, just update
+                       up_walls_group)
                 Border("down", x * tile_width + lx + 1, (y + 1) * tile_height + ly - 1, (x + 1) * tile_width + lx - 2,
                        (y + 1) * tile_height + ly - 1,
-                       down_walls_group)  # it very early to make it covered with others titles and sprites.
+                       down_walls_group)
             elif level[y][x] == '@':
                 Tile('ground', x, y, grounds_group, tile_images, tile_width, tile_height, lx, ly)
                 new_player = Player(player_sprite, pl_up_sprite, pl_down_sprite, pl_right_sprite, pl_left_sprite, 4, 1,
@@ -186,6 +188,7 @@ def generate_level(level):
                 curr_lamp = Lamp(curr_enemy.rect.x, curr_enemy.rect.y, lamp_up_sprite, lamp_down_sprite, lamp_right_sprite, lamp_left_sprite, id_cntr, lamps_group)
                 curr_enemy.lamp = curr_lamp
                 id_cntr += 1
+    #  создание невидимых границ уровня, чтобы игрок не смог выйти за его пределы:
     Border("right", lx, ly, lx, (y + 1) * tile_height + ly, right_walls_group)
     Border("left", lx + (x + 1) * tile_width, ly, lx + (x + 1) * tile_width, (y + 1) * tile_height + ly, left_walls_group)
     Border("down", lx, ly, lx + (x + 1) * tile_width, ly, down_walls_group)
@@ -200,9 +203,10 @@ def terminate():
 
 pygame.mixer.music.load(main_music)
 pygame.mixer.music.play(1000000)
+#   ну что бы наверняка
 
 
-def clear_groups():
+def clear_groups(): #   очистка
     lamps_group.empty()
     grounds_group.empty()
     walls_group.empty()
@@ -214,7 +218,7 @@ def clear_groups():
     enemies_group.empty()
 
 
-def main(al_cntr):
+def main(al_cntr):  #   основной игровой цикл
     going_up = False
     going_down = False
     going_right = False
@@ -226,7 +230,6 @@ def main(al_cntr):
             if event.type == pygame.QUIT:
                 terminate()
                 break
-            keys = pygame.key.get_pressed()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pause_screen()
@@ -255,7 +258,7 @@ def main(al_cntr):
                         going_down = False
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
-                    # Turning off moving if we stopped pressing key
+                    # Перестаем бегать, если кнопка отжата
                     going_right = False
                 if event.key == pygame.K_LEFT or event.key == pygame.K_a:
                     going_left = False
@@ -275,7 +278,8 @@ def main(al_cntr):
                     break
         went_anywhere = False
         if going_down:
-            #   if people can go and he wants go (key pressed), every iteration we move him to his speed
+            #   если игрок может пойти куда-то (проверятся в цикле обработки событий) и
+            #   он хочет туда пойти (кнопка зажата), то тогда каждую итерацию перемещаем его на его скорость
             went_anywhere = True
             player.move_down(2)
         if going_up:
@@ -290,7 +294,8 @@ def main(al_cntr):
         if not went_anywhere:
             player.stay_on()
 
-        #   if people collided with wall, we make him go back (we must do this with player's speed)
+        #   если челик в стене, то тогда мы "выталкиваем
+        #   его обратно
         if pygame.sprite.spritecollideany(player, left_walls_group):
             player.move_left(2)
         if pygame.sprite.spritecollideany(player, right_walls_group):
@@ -300,6 +305,8 @@ def main(al_cntr):
         if pygame.sprite.spritecollideany(player, down_walls_group):
             player.move_down(2)
 
+        #   вручную пробегаемся по всем противникам,
+        #   и если мы сопприкасаемся в с кем-то, то убиваем его
         for enemy in enemies_group:
             if pygame.sprite.collide_rect(player, enemy) and not enemy.dead:
                 alive_cntr -= 1
@@ -318,20 +325,28 @@ def main(al_cntr):
         player_group.draw(screen)
         walls_group.draw(screen)
         buttons_group.draw(screen)
+
         pygame.display.flip()
         clock.tick(FPS)
 
 
 curr_level = start_screen()
+#   проверка на то, ввел ли пользователь название карты или решил сыграть в готовые уровни
 if curr_level != None:
-    player, level_x, level_y, level_map, enemies_cntr = generate_level(load_level(f"levels/{curr_level}"))
-    main(enemies_cntr)
-else:
-    for i in range(1, 21):
-        player, level_x, level_y, level_map, enemies_cntr = generate_level(load_level(f"levels/level{i}.txt"))
+    try:
+        player, level_x, level_y, level_map, enemies_cntr = generate_level(load_level(f"levels/{curr_level}"))
         running = True
         main(enemies_cntr)
-        clear_groups()
-        pause_screen()
-
+    except FileNotFoundError:
+        print("\033[31mОшибка 101: Файл не найден")
+else:
+    try:
+        for i in range(1, 21):
+            player, level_x, level_y, level_map, enemies_cntr = generate_level(load_level(f"levels/level{i}.txt"))
+            running = True
+            main(enemies_cntr)
+            clear_groups()
+            pause_screen()
+    except FileNotFoundError:
+        print("\033[31mОшибка 102: Системный файл карты уровня не найден")
 pygame.quit()
