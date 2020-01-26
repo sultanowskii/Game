@@ -3,7 +3,8 @@ import random
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, staying, sheet_up, sheet_down, sheet_right, sheet_left, columns, rows, x, y, group, map, y_map_now, x_map_now,
+    def __init__(self, staying, sheet_up, sheet_down, sheet_right, sheet_left, columns, rows, x, y, group, map,
+                 y_map_now, x_map_now,
                  id):  # think about making a mask here
         super().__init__(group)
         self.lamp = None
@@ -61,13 +62,31 @@ class Enemy(pygame.sprite.Sprite):
                         en.make_way(self.x_go_now, self.y_go_now)
                     else:
                         en.make_way(self.x_now, self.y_now)
-            for i in range(len(self.way_x)):
-                print(self.way_x[i], self.way_y[i])
-            print()
             self.rect.x = -100
             self.rect.y = -100
             self.lamp.rect.x = -100
             self.lamp.rect.y = -100
+
+    def timer(self):
+        screen = pygame.display.set_mode((128, 128))
+        clock = pygame.time.Clock()
+        counter, text = 2, '2'.rjust(3)
+        pygame.time.set_timer(pygame.USEREVENT, 1000)
+        font = pygame.font.SysFont('Consolas', 30)
+
+        while True:
+            for e in pygame.event.get():
+                if e.type == pygame.USEREVENT:
+                    counter -= 1
+                    text = str(counter).rjust(3) if counter > 0 else 'dead'
+                if e.type == pygame.QUIT: break
+            else:
+
+                screen.blit(font.render(text, True, (0, 0, 0)), (32, 48))
+                pygame.display.flip()
+                clock.tick(60)
+                continue
+            break
 
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(self.rect.x, self.rect.y, sheet.get_width() // columns,
@@ -197,6 +216,22 @@ class Enemy(pygame.sprite.Sprite):
                 a[2] = True
             if self.can_go_down(x_now, y_now):
                 a[3] = True
+            contin = random.randint(0, 100)
+            if contin <= 75:
+                if self.last_x != x_now:
+                    if self.last_x > x_now:
+                        if a[2]:
+                            return x_now - 1, y_now
+                    else:
+                        if a[3]:
+                            return x_now + 1, y_now
+                else:
+                    if self.last_y > y_now:
+                        if a[0]:
+                            return x_now, y_now - 1
+                    else:
+                        if a[1]:
+                            return x_now, y_now + 1
             while not a[b]:
                 b = random.randint(0, 3)
             if b == 0:
