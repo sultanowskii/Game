@@ -123,6 +123,32 @@ def start_screen():
         clock.tick(FPS)
 
 
+def next_level_screen():
+    x = 1
+    y = 1
+    print("Нажмите ''5'' и введите название уровня, "
+          "если хотите запустить свой уровень, в другом случае нажмите любую кнопку")
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+                return
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                return
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_5: #   если нажата кнопкаа "5", то ждем от юзера названия уровня
+                    level = input()
+                    return level
+                return
+        background = pygame.transform.scale(load_image(f'bck_frames\\bck_start{x}.png'), (X, Y))
+        text = pygame.transform.scale(load_image(f'continue_text\\press_text{y // 5 + 1}.png', (235, 255, 255)), (810, 54))
+        screen.blit(background, (0, 0))
+        screen.blit(text, (-3, 530))
+        x = (x + 1) % 40 + 1
+        y = (y + 1) % 40 + 1
+        pygame.display.flip()
+        clock.tick(FPS)
+
 def pause_screen():
     x = 1
     y = 1
@@ -190,6 +216,7 @@ def generate_level(level):
                        right_down_corner_group)
             elif level[y][x] == '@':
                 Tile('ground', x, y, grounds_group, tile_images, tile_width, tile_height, lx, ly)
+                player_group.empty()
                 new_player = Player(player_sprite, pl_up_sprite, pl_down_sprite, pl_right_sprite, pl_left_sprite, 4, 1,
                                     x * tile_width + (tile_width - charecter_width) / 2 + lx,
                                     y * tile_height + (tile_height - charecter_height) / 2 + ly, player_group)
@@ -348,9 +375,14 @@ curr_level = start_screen()
 #   проверка на то, ввел ли пользователь название карты или решил сыграть в готовые уровни
 if curr_level != None:
     try:
-        player, level_x, level_y, level_map, enemies_cntr = generate_level(load_level(f"levels/{curr_level}"))
-        running = True
-        main(enemies_cntr)
+        while curr_level != None:
+            isPlayerDead = True
+            while isPlayerDead:
+                player, level_x, level_y, level_map, enemies_cntr = generate_level(load_level(f"levels/{curr_level}"))
+                running = True
+                isPlayerDead = main(enemies_cntr)
+                clear_groups()
+            next_level_screen()
     except FileNotFoundError:
         print("\033[31mОшибка 101: Файл не найден")
 else:
@@ -362,7 +394,7 @@ else:
                 running = True
                 isPlayerDead = main(enemies_cntr)
                 clear_groups()
-            pause_screen()
+            next_level_screen()
     except FileNotFoundError:
         print("\033[31mОшибка 102: Системный файл карты уровня не найден")
 terminate()
