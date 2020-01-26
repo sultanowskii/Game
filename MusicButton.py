@@ -2,6 +2,7 @@ import pygame
 from Button import Button
 
 
+#   кнопка включения и выключения музыки
 class MusicButton(Button):
     def __init__(self, x, y, on_sprite, off_sprite, group, size_x, size_y):
         super().__init__(group, x, y, size_x, size_y,)

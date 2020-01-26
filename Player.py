@@ -2,8 +2,9 @@ import pygame
 import os
 
 
+#   игрок
 class Player(pygame.sprite.Sprite):
-    def __init__(self, staying, sheet_up, sheet_down, sheet_right, sheet_left, columns, rows, x, y, group):  # think about making a mask here
+    def __init__(self, staying, sheet_up, sheet_down, sheet_right, sheet_left, columns, rows, x, y, group):
         super().__init__(group)
         self.curr_looking = "staying"
         self.stay = staying
@@ -18,18 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.cntr = 0
         self.frames = []
 
-    def load_image(self, name, colorkey=None):
-        fullname = os.path.join('data', name)
-        image = pygame.image.load(fullname)
-        if colorkey is not None:
-            if colorkey == -1:
-                colorkey = image.get_at((0, 0))
-            image = image.convert()
-            image.set_colorkey(colorkey)
-        else:
-            image = image.convert_alpha()
-        return image
-
+    #   функции смены анимаций спрайта в зависимости от направления движения
     def stay_on(self):
         self.curr_looking = "staying"
         self.image = self.stay
@@ -68,6 +58,7 @@ class Player(pygame.sprite.Sprite):
             self.cut_sheet(self.s_left, self.columns, self.rows)
             self.cntr = 0
 
+    #   разрезание изображения на кадры
     def cut_sheet(self, sheet, columns, rows):
         self.rect = pygame.Rect(self.rect.x, self.rect.y, sheet.get_width() // columns,
                                 sheet.get_height() // rows)
@@ -84,3 +75,4 @@ class Player(pygame.sprite.Sprite):
             if (self.cntr + 1) % 5 == 0:
                 self.image = self.frames[self.cntr // 5]
         self.cntr = (self.cntr + 1) % 20
+        #   увеличиваем время смены спрайтов в 5 раз, умножая кол-во кадров в 5 раз и деля их в индексе

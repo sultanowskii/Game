@@ -1,6 +1,7 @@
 import pygame
 
 
+#   лампа полицейских, служит для обнаружения игрока
 class Lamp(pygame.sprite.Sprite):
     def __init__(self, x, y, sprite_up, sprite_down, sprite_right, sprite_left, id, group):
         super().__init__(group)
@@ -12,11 +13,12 @@ class Lamp(pygame.sprite.Sprite):
         self.image = sprite_down
         self.rect = self.image.get_rect().move(x, y)
 
+    #   функции поворота и праильного перемещения лампы относительно ее владельца
     def rotate_up(self, x, y):
         self.image = self.s_up
         self.rect = self.image.get_rect()
         self.rect.x = x - 12
-        self.rect.y = y - 60
+        self.rect.y = y - 48
 
     def rotate_down(self, x, y):
         self.image = self.s_down
@@ -33,5 +35,5 @@ class Lamp(pygame.sprite.Sprite):
     def rotate_left(self, x, y):
         self.image = self.s_left
         self.rect = self.image.get_rect()
-        self.rect.x = x - 60
+        self.rect.x = x - 48
         self.rect.y = y - 12
