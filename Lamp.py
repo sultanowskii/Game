@@ -18,7 +18,7 @@ class Lamp(pygame.sprite.Sprite):
         self.image = self.s_up
         self.rect = self.image.get_rect()
         self.rect.x = x - 12
-        self.rect.y = y - 60
+        self.rect.y = y - 48
 
     def rotate_down(self, x, y):
         self.image = self.s_down
@@ -35,5 +35,5 @@ class Lamp(pygame.sprite.Sprite):
     def rotate_left(self, x, y):
         self.image = self.s_left
         self.rect = self.image.get_rect()
-        self.rect.x = x - 60
+        self.rect.x = x - 48
         self.rect.y = y - 12

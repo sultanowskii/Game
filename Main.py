@@ -68,17 +68,24 @@ en_right_sprite = load_image("enemy_sprite_right.png", -1)
 en_left_sprite = load_image("enemy_sprite_left.png", -1)
 
 main_music = 'data/music.mp3'  # Jason Garner & Vince de Vera – Creepy Forest (Vinyl) (Don t Starve OST)
+sound_of_death = pygame.mixer.Sound('data/sound_of_death.ogg')
 
 lamps_group = pygame.sprite.Group()
 buttons_group = pygame.sprite.Group()
 grounds_group = pygame.sprite.Group()
 walls_group = pygame.sprite.Group()
+player_group = pygame.sprite.Group()
+enemies_group = pygame.sprite.Group()
+
 left_walls_group = pygame.sprite.Group()
 right_walls_group = pygame.sprite.Group()
 up_walls_group = pygame.sprite.Group()
 down_walls_group = pygame.sprite.Group()
-player_group = pygame.sprite.Group()
-enemies_group = pygame.sprite.Group()
+right_up_corner_group = pygame.sprite.Group()
+left_up_corner_group = pygame.sprite.Group()
+right_down_corner_group = pygame.sprite.Group()
+left_down_corner_group = pygame.sprite.Group()
+
 
 music_button = MusicButton(695, 5, music_on_button_sprite, music_off_button_sprite, buttons_group, 100, 44)
 pause_button = PauseButton(645, 5, pause_button_sprite, buttons_group, 44, 44)
@@ -88,7 +95,7 @@ player = None
 def start_screen():
     x = 1
     y = 1
-    print("\033[33mПривет! Нажав в игровом окне любую кнопку, то вы загрузите уровни,")
+    print("\033[33mПривет! Нажав в игровом окне любую кнопку, вы загрузите уровни,")
     print("созданные \033[35mразработичками.\033[0m")
     print("\033[33mЕсли же вы хотите сыграть в \033[32mсвой уровень\033[33m (инструкция по ее созданию")
     print("\033[33mесть в папке с игрой), то тогда нажмите с открытым окном клавишу '"
@@ -162,17 +169,25 @@ def generate_level(level):
                 Tile('wall', x, y, walls_group, tile_images, tile_width, tile_height, lx, ly)
                 # для каждой стены создаем невидимые барьеры
                 Border("left", x * tile_width + lx, y * tile_height + ly + 1, x * tile_width + lx,
-                       (y + 1) * tile_height + ly - 2,
+                       (y + 1) * tile_height + ly - 1,
                        left_walls_group)
-                Border("right", (x + 1) * tile_width + lx, y * tile_height + ly + 1, (x + 1) * tile_width + lx,
-                       (y + 1) * tile_height + ly - 2,
+                Border("right", (x + 1) * tile_width + lx - 1, y * tile_height + ly + 1, (x + 1) * tile_width + lx - 1,
+                       (y + 1) * tile_height + ly - 1,
                        right_walls_group)
-                Border("up", x * tile_width + lx + 1, y * tile_height + ly, (x + 1) * tile_width + lx - 2,
+                Border("up", x * tile_width + lx + 1, y * tile_height + ly, (x + 1) * tile_width + lx - 1,
                        y * tile_height + ly,
                        up_walls_group)
-                Border("down", x * tile_width + lx + 1, (y + 1) * tile_height + ly - 1, (x + 1) * tile_width + lx - 2,
+                Border("down", x * tile_width + lx + 1, (y + 1) * tile_height + ly - 1, (x + 1) * tile_width + lx - 1,
                        (y + 1) * tile_height + ly - 1,
                        down_walls_group)
+                Border("corner", x * tile_width + lx, y * tile_height + ly, x * tile_width + lx, y * tile_height + ly,
+                       left_up_corner_group)
+                Border("corner", (x + 1) * tile_width + lx - 1, y * tile_height + ly, (x + 1) * tile_width + lx - 1, y * tile_height + ly,
+                       right_up_corner_group)
+                Border("corner", x * tile_width + lx, (y + 1) * tile_height + ly - 1, x * tile_width + lx, (y + 1) * tile_height + ly - 1,
+                       left_down_corner_group)
+                Border("corner", (x + 1) * tile_width + lx - 1, (y + 1) * tile_height + ly - 1, (x + 1) * tile_width + lx - 1, (y + 1) * tile_height + ly - 1,
+                       right_down_corner_group)
             elif level[y][x] == '@':
                 Tile('ground', x, y, grounds_group, tile_images, tile_width, tile_height, lx, ly)
                 new_player = Player(player_sprite, pl_up_sprite, pl_down_sprite, pl_right_sprite, pl_left_sprite, 4, 1,
@@ -198,6 +213,7 @@ def generate_level(level):
 
 def terminate():
     pygame.quit()
+    print("\033[36mСпасибо, что играли в нашу игру!")
     sys.exit()
 
 
@@ -282,43 +298,41 @@ def main(al_cntr):  #   основной игровой цикл
             #   он хочет туда пойти (кнопка зажата), то тогда каждую итерацию перемещаем его на его скорость
             went_anywhere = True
             player.move_down(2)
+            if pygame.sprite.spritecollideany(player, up_walls_group):
+                player.move_up(2)
         if going_up:
             player.move_up(2)
             went_anywhere = True
+            if pygame.sprite.spritecollideany(player, down_walls_group):
+                player.move_down(2)
         if going_right:
             player.move_right(2)
             went_anywhere = True
+            if pygame.sprite.spritecollideany(player, left_walls_group):
+                player.move_left(2)
         if going_left:
             player.move_left(2)
             went_anywhere = True
+            if pygame.sprite.spritecollideany(player, right_walls_group):
+                player.move_right(2)
         if not went_anywhere:
             player.stay_on()
-
-        #   если челик в стене, то тогда мы "выталкиваем
-        #   его обратно
-        if pygame.sprite.spritecollideany(player, left_walls_group):
-            player.move_left(2)
-        if pygame.sprite.spritecollideany(player, right_walls_group):
-            player.move_right(2)
-        if pygame.sprite.spritecollideany(player, up_walls_group):
-            player.move_up(2)
-        if pygame.sprite.spritecollideany(player, down_walls_group):
-            player.move_down(2)
 
         #   вручную пробегаемся по всем противникам,
         #   и если мы сопприкасаемся в с кем-то, то убиваем его
         for enemy in enemies_group:
             if pygame.sprite.collide_rect(player, enemy) and not enemy.dead:
+                sound_of_death.play()
                 alive_cntr -= 1
                 enemy.kill()
+
+        if pygame.sprite.spritecollideany(player, lamps_group):
+            sound_of_death.play()
+            return True
 
         player_group.update()
         enemies_group.update()
         buttons_group.update()
-        right_walls_group.draw(screen)
-        left_walls_group.draw(screen)
-        up_walls_group.draw(screen)
-        down_walls_group.draw(screen)
         grounds_group.draw(screen)
         lamps_group.draw(screen)
         enemies_group.draw(screen)
@@ -342,11 +356,13 @@ if curr_level != None:
 else:
     try:
         for i in range(1, 21):
-            player, level_x, level_y, level_map, enemies_cntr = generate_level(load_level(f"levels/level{i}.txt"))
-            running = True
-            main(enemies_cntr)
-            clear_groups()
+            isPlayerDead = True
+            while isPlayerDead:
+                player, level_x, level_y, level_map, enemies_cntr = generate_level(load_level(f"levels/level{i}.txt"))
+                running = True
+                isPlayerDead = main(enemies_cntr)
+                clear_groups()
             pause_screen()
     except FileNotFoundError:
         print("\033[31mОшибка 102: Системный файл карты уровня не найден")
-pygame.quit()
+terminate()
