@@ -382,7 +382,7 @@ if curr_level != None:
                 running = True
                 isPlayerDead = main(enemies_cntr)
                 clear_groups()
-            next_level_screen()
+            curr_level = next_level_screen()
     except FileNotFoundError:
         print("\033[31mОшибка 101: Файл не найден")
 else:
@@ -394,7 +394,16 @@ else:
                 running = True
                 isPlayerDead = main(enemies_cntr)
                 clear_groups()
-            next_level_screen()
+            curr_level = next_level_screen()
+            while curr_level != None:
+                isPlayerDead = True
+                while isPlayerDead:
+                    player, level_x, level_y, level_map, enemies_cntr = generate_level(
+                        load_level(f"levels/{curr_level}"))
+                    running = True
+                    isPlayerDead = main(enemies_cntr)
+                    clear_groups()
+                curr_level = next_level_screen()
     except FileNotFoundError:
         print("\033[31mОшибка 102: Системный файл карты уровня не найден")
 terminate()
