@@ -9,6 +9,8 @@ from Border import Border
 from MusicButton import MusicButton
 from Lamp import Lamp
 from PauseButton import PauseButton
+import datetime
+
 
 SIZE = X, Y = 800, 600
 FPS = 60
@@ -18,7 +20,7 @@ WHITE = pygame.Color("white")
 pygame.init()
 
 
-def load_image(name, colorkey=None):    #   загрузка изображения и создание прозрачного фона
+def load_image(name, colorkey=None):  # загрузка изображения и создание прозрачного фона
     fullname = os.path.join('data', name)
     image = pygame.image.load(fullname)
     if colorkey is not None:
@@ -35,9 +37,10 @@ screen = pygame.display.set_mode((X, Y))
 clock = pygame.time.Clock()
 screen.fill(BLACK)
 
+second_beginning = -1
 tile_width = tile_height = 48
 charecter_height = charecter_width = 24
-lx = -1 # отступы поля от границы экрана
+lx = -1  # отступы поля от границы экрана
 ly = -1
 
 going_up = False
@@ -86,7 +89,6 @@ left_up_corner_group = pygame.sprite.Group()
 right_down_corner_group = pygame.sprite.Group()
 left_down_corner_group = pygame.sprite.Group()
 
-
 music_button = MusicButton(695, 5, music_on_button_sprite, music_off_button_sprite, buttons_group, 100, 44)
 pause_button = PauseButton(645, 5, pause_button_sprite, buttons_group, 44, 44)
 player = None
@@ -109,12 +111,13 @@ def start_screen():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 return
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_5: #   если нажата кнопкаа "5", то ждем от юзера названия уровня
+                if event.key == pygame.K_5:  # если нажата кнопкаа "5", то ждем от юзера названия уровня
                     level = input()
                     return level
                 return
         background = pygame.transform.scale(load_image(f'bck_frames\\bck_start{x}.png'), (X, Y))
-        text = pygame.transform.scale(load_image(f'continue_text\\press_text{y // 5 + 1}.png', (235, 255, 255)), (810, 54))
+        text = pygame.transform.scale(load_image(f'continue_text\\press_text{y // 5 + 1}.png', (235, 255, 255)),
+                                      (810, 54))
         screen.blit(background, (0, 0))
         screen.blit(text, (-3, 530))
         x = (x + 1) % 40 + 1
@@ -136,18 +139,20 @@ def next_level_screen():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 return
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_5: #   если нажата кнопкаа "5", то ждем от юзера названия уровня
+                if event.key == pygame.K_5:  # если нажата кнопкаа "5", то ждем от юзера названия уровня
                     level = input()
                     return level
                 return
         background = pygame.transform.scale(load_image(f'bck_frames\\bck_start{x}.png'), (X, Y))
-        text = pygame.transform.scale(load_image(f'continue_text\\press_text{y // 5 + 1}.png', (235, 255, 255)), (810, 54))
+        text = pygame.transform.scale(load_image(f'continue_text\\press_text{y // 5 + 1}.png', (235, 255, 255)),
+                                      (810, 54))
         screen.blit(background, (0, 0))
         screen.blit(text, (-3, 530))
         x = (x + 1) % 40 + 1
         y = (y + 1) % 40 + 1
         pygame.display.flip()
         clock.tick(FPS)
+
 
 def pause_screen():
     x = 1
@@ -167,7 +172,7 @@ def pause_screen():
         screen.blit(text, (-3, 530))
         screen.blit(pause_table, (45, 5))
         x = (x + 1) % 40 + 1
-        y = (y + 1) % 40 + 1    # увеличиваем время между сменой кадров (умножаем на 5, и в строке
+        y = (y + 1) % 40 + 1  # увеличиваем время между сменой кадров (умножаем на 5, и в строке
         #   присваивания (text = ...) делим его на 5)
         pygame.display.flip()
         clock.tick(FPS)
@@ -208,11 +213,14 @@ def generate_level(level):
                        down_walls_group)
                 Border("corner", x * tile_width + lx, y * tile_height + ly, x * tile_width + lx, y * tile_height + ly,
                        left_up_corner_group)
-                Border("corner", (x + 1) * tile_width + lx - 1, y * tile_height + ly, (x + 1) * tile_width + lx - 1, y * tile_height + ly,
+                Border("corner", (x + 1) * tile_width + lx - 1, y * tile_height + ly, (x + 1) * tile_width + lx - 1,
+                       y * tile_height + ly,
                        right_up_corner_group)
-                Border("corner", x * tile_width + lx, (y + 1) * tile_height + ly - 1, x * tile_width + lx, (y + 1) * tile_height + ly - 1,
+                Border("corner", x * tile_width + lx, (y + 1) * tile_height + ly - 1, x * tile_width + lx,
+                       (y + 1) * tile_height + ly - 1,
                        left_down_corner_group)
-                Border("corner", (x + 1) * tile_width + lx - 1, (y + 1) * tile_height + ly - 1, (x + 1) * tile_width + lx - 1, (y + 1) * tile_height + ly - 1,
+                Border("corner", (x + 1) * tile_width + lx - 1, (y + 1) * tile_height + ly - 1,
+                       (x + 1) * tile_width + lx - 1, (y + 1) * tile_height + ly - 1,
                        right_down_corner_group)
             elif level[y][x] == '@':
                 Tile('ground', x, y, grounds_group, tile_images, tile_width, tile_height, lx, ly)
@@ -225,14 +233,17 @@ def generate_level(level):
                 a = x * tile_width + (tile_width - charecter_width) // 2 + lx
                 b = y * tile_height + (tile_height - charecter_height) // 2 + ly
                 ens += 1
-                curr_enemy = Enemy(enemy_sprite, en_up_sprite, en_down_sprite, en_right_sprite, en_left_sprite, 4, 1, a, b, enemies_group, level,
-                      (a - lx) // tile_width, (b - ly) // tile_height, id_cntr)
-                curr_lamp = Lamp(curr_enemy.rect.x, curr_enemy.rect.y, lamp_up_sprite, lamp_down_sprite, lamp_right_sprite, lamp_left_sprite, id_cntr, lamps_group)
+                curr_enemy = Enemy(enemy_sprite, en_up_sprite, en_down_sprite, en_right_sprite, en_left_sprite, 4, 1, a,
+                                   b, enemies_group, level,
+                                   (a - lx) // tile_width, (b - ly) // tile_height, id_cntr)
+                curr_lamp = Lamp(curr_enemy.rect.x, curr_enemy.rect.y, lamp_up_sprite, lamp_down_sprite,
+                                 lamp_right_sprite, lamp_left_sprite, id_cntr, lamps_group)
                 curr_enemy.lamp = curr_lamp
                 id_cntr += 1
     #  создание невидимых границ уровня, чтобы игрок не смог выйти за его пределы:
     Border("right", lx, ly, lx, (y + 1) * tile_height + ly, right_walls_group)
-    Border("left", lx + (x + 1) * tile_width, ly, lx + (x + 1) * tile_width, (y + 1) * tile_height + ly, left_walls_group)
+    Border("left", lx + (x + 1) * tile_width, ly, lx + (x + 1) * tile_width, (y + 1) * tile_height + ly,
+           left_walls_group)
     Border("down", lx, ly, lx + (x + 1) * tile_width, ly, down_walls_group)
     Border("up", lx, ly + (y + 1) * tile_height, lx + (x + 1) * tile_width, (y + 1) * tile_height + ly, up_walls_group)
     return new_player, x, y, level, ens
@@ -246,10 +257,12 @@ def terminate():
 
 pygame.mixer.music.load(main_music)
 pygame.mixer.music.play(1000000)
+
+
 #   ну что бы наверняка
 
 
-def clear_groups(): #   очистка
+def clear_groups():  # очистка
     lamps_group.empty()
     grounds_group.empty()
     walls_group.empty()
@@ -261,7 +274,7 @@ def clear_groups(): #   очистка
     enemies_group.empty()
 
 
-def main(al_cntr):  #   основной игровой цикл
+def main(al_cntr):  # основной игровой цикл
     going_up = False
     going_down = False
     going_right = False
@@ -354,8 +367,17 @@ def main(al_cntr):  #   основной игровой цикл
                 enemy.kill()
 
         if pygame.sprite.spritecollideany(player, lamps_group):
-            sound_of_death.play()
-            return True
+            if second_beginning == -1:
+                second_beginning = datetime.datetime.now().second
+            else:
+                if datetime.datetime.now().second * 2 >= (second_beginning * 2 + 1) % 120:
+                    print(datetime.datetime.now().second * 2)
+                    print((second_beginning * 2 + 1) % 120)
+                    sound_of_death.play()
+                    second_beginning = -1
+                    return True
+        else:
+            second_beginning = -1
 
         player_group.update()
         enemies_group.update()
