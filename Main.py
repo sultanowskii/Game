@@ -371,8 +371,6 @@ def main(al_cntr):  # основной игровой цикл
                 second_beginning = datetime.datetime.now().second
             else:
                 if datetime.datetime.now().second * 2 >= (second_beginning * 2 + 1) % 120:
-                    print(datetime.datetime.now().second * 2)
-                    print((second_beginning * 2 + 1) % 120)
                     sound_of_death.play()
                     second_beginning = -1
                     return True
